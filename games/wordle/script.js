@@ -13,15 +13,65 @@ let gameState = {
     board: [],
     targetWord: "",
     validWords: new Set(),
-    keyStates: {}
+    keyStates: {},
+    isUnlimited: false
 };
+
+let allAnswers = [];
 
 async function init() {
     const res = await fetch("words.json");
     const data = await res.json();
+    allAnswers = data.answers;
     gameState.validWords = new Set([...data.answers, ...data.validGuesses]);
-    gameState.targetWord = data.answers[Math.floor(Math.random() * data.answers.length)];
+
+    document.getElementById("mode-daily").addEventListener("click", () => switchMode(false));
+    document.getElementById("mode-unlimited").addEventListener("click", () => switchMode(true));
+
+    document.addEventListener("keydown", handlePhysicalKey);
+    window.addEventListener("message", (e) => {
+        if (e.data && e.data.type === "forward-keydown") {
+            handleInput(e.data.key.toLowerCase());
+        }
+    });
+
+    loadGame();
+}
+
+function switchMode(unlimited) {
+    if (gameState.isUnlimited === unlimited) return;
+    document.getElementById("mode-daily").className = unlimited ? "mode-btn" : "mode-btn active";
+    document.getElementById("mode-unlimited").className = unlimited ? "mode-btn active" : "mode-btn";
+    gameState.isUnlimited = unlimited;
+    loadGame();
+}
+
+function getDailyWord() {
+    const epochMs = new Date("2021-06-19T00:00:00").valueOf();
+    const now = Date.now();
+    const msInDay = 86400000;
+    const index = Math.floor((now - epochMs) / msInDay);
+    return allAnswers[index % allAnswers.length];
+}
+
+function loadGame() {
     const boardEl = document.getElementById("board");
+    boardEl.innerHTML = "";
+    const kbEl = document.getElementById("keyboard");
+    kbEl.innerHTML = "";
+
+    gameState.currentRow = 0;
+    gameState.currentTile = 0;
+    gameState.isGameOver = false;
+    gameState.board = [];
+    gameState.keyStates = {};
+
+    if (gameState.isUnlimited) {
+        gameState.targetWord = allAnswers[Math.floor(Math.random() * allAnswers.length)];
+    } else {
+        gameState.targetWord = getDailyWord();
+    }
+
     for (let r = 0; r < MAX_GUESSES; r++) {
         const row = document.createElement("div");
         row.className = "row";
@@ -36,14 +86,45 @@ async function init() {
         boardEl.appendChild(row);
         gameState.board.push(rowDom);
     }
+
     buildKeyboard();
-    document.addEventListener("keydown", handlePhysicalKey);
-    
-    window.addEventListener("message", (e) => {
-        if (e.data && e.data.type === "forward-keydown") {
-            handleInput(e.data.key.toLowerCase());
+
+    if (!gameState.isUnlimited) {
+        const saved = localStorage.getItem("dailydle-wordle-state");
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.targetWord === gameState.targetWord) {
+                restoreState(parsed);
+            } else {
+                localStorage.removeItem("dailydle-wordle-state");
+            }
         }
+    }
+}
+
+function restoreState(parsed) {
+    parsed.guesses.forEach(guess => {
+        for (let i = 0; i < WORD_LENGTH; i++) {
+            addLetter(guess[i]);
+        }
+        submitGuess(true);
     });
+}
+
+function saveState() {
+    if (gameState.isUnlimited) return;
+    const guesses = [];
+    for (let r = 0; r < gameState.currentRow; r++) {
+        let guess = "";
+        for (let c = 0; c < WORD_LENGTH; c++) {
+            guess += gameState.board[r][c].textContent.toLowerCase();
+        }
+        guesses.push(guess);
+    }
+    localStorage.setItem("dailydle-wordle-state", JSON.stringify({
+        targetWord: gameState.targetWord,
+        guesses: guesses
+    }));
 }
 
 function buildKeyboard() {
@@ -68,7 +149,12 @@ function buildKeyboard() {
 }
 
 function handleInput(key) {
-    if (gameState.isGameOver) return;
+    if (gameState.isGameOver) {
+        if (gameState.isUnlimited && key === "enter") {
+            loadGame();
+        }
+        return;
+    }
     if (key === "enter") {
         submitGuess();
     } else if (key === "backspace") {
@@ -100,9 +186,9 @@ function deleteLetter() {
     }
 }
 
-function submitGuess() {
+function submitGuess(isRestoring = false) {
     if (gameState.currentTile !== WORD_LENGTH) {
-        showMessage("Not enough letters");
+        if (!isRestoring) showMessage("Not enough letters");
         return;
     }
     let guess = "";
@@ -110,7 +196,7 @@ function submitGuess() {
         guess += gameState.board[gameState.currentRow][i].textContent.toLowerCase();
     }
     if (!gameState.validWords.has(guess)) {
-        showMessage("Not in word list");
+        if (!isRestoring) showMessage("Not in word list");
         return;
     }
     const tileRow = gameState.board[gameState.currentRow];
@@ -134,14 +220,18 @@ function submitGuess() {
         tileRow[i].setAttribute('data-state', results[i]);
         updateKeyState(guess[i], results[i]);
     }
+    
+    gameState.currentRow++;
+    
+    if (!isRestoring) saveState();
+
     if (guess === gameState.targetWord) {
-        showMessage("Splendid!");
+        if (!isRestoring) showMessage(gameState.isUnlimited ? "Splendid! Press Enter to play again." : "Splendid!");
         gameState.isGameOver = true;
-    } else if (gameState.currentRow === MAX_GUESSES - 1) {
-        showMessage(gameState.targetWord.toUpperCase());
+    } else if (gameState.currentRow === MAX_GUESSES) {
+        if (!isRestoring) showMessage(gameState.targetWord.toUpperCase() + (gameState.isUnlimited ? " - Press Enter to replay" : ""));
         gameState.isGameOver = true;
     } else {
-        gameState.currentRow++;
         gameState.currentTile = 0;
     }
 }
@@ -162,7 +252,7 @@ function showMessage(msg) {
     const messageEl = document.getElementById("message");
     messageEl.textContent = msg;
     messageEl.className = "visible";
-    setTimeout(() => { messageEl.className = ""; }, 1500);
+    setTimeout(() => { messageEl.className = ""; }, 2500);
 }
 
 init();
