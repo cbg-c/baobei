@@ -48,7 +48,22 @@ async function switchMode(unlimited) {
     await loadGame();
 }
 
+function getTodayString() {
+    const now = new Date();
+    return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
 async function getDailyWord() {
+    const today = getTodayString();
+    const cached = localStorage.getItem("dailydle-nyt-cache");
+    
+    if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.date === today) {
+            return parsed.word;
+        }
+    }
+
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -72,6 +87,7 @@ async function getDailyWord() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.solution) {
+                    localStorage.setItem("dailydle-nyt-cache", JSON.stringify({ date: today, word: data.solution }));
                     return data.solution;
                 }
             }
@@ -81,7 +97,10 @@ async function getDailyWord() {
     const start = new Date(2021, 5, 19, 0, 0, 0, 0);
     const diff = now.setHours(0, 0, 0, 0) - start.getTime();
     const index = Math.floor(diff / 86400000);
-    return allAnswers[index % allAnswers.length];
+    const fallbackWord = allAnswers[index % allAnswers.length];
+    
+    localStorage.setItem("dailydle-nyt-cache", JSON.stringify({ date: today, word: fallbackWord }));
+    return fallbackWord;
 }
 
 async function loadGame() {
