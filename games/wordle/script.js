@@ -58,13 +58,15 @@ async function getDailyWord() {
     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
     
     try {
-        const response = await fetch(proxyUrl);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
+        const response = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (response.ok) {
             const data = await response.json();
             return data.solution;
         }
-    } catch (e) {
-    }
+    } catch (e) {}
     
     const start = new Date(2021, 5, 19, 0, 0, 0, 0);
     const diff = now.setHours(0, 0, 0, 0) - start.getTime();
@@ -85,12 +87,7 @@ async function loadGame() {
     gameState.isAnimating = false;
     gameState.board = [];
     gameState.keyStates = {};
-
-    if (gameState.isUnlimited) {
-        gameState.targetWord = allAnswers[Math.floor(Math.random() * allAnswers.length)];
-    } else {
-        gameState.targetWord = await getDailyWord();
-    }
+    gameState.targetWord = "";
 
     for (let r = 0; r < MAX_GUESSES; r++) {
         const row = document.createElement("div");
@@ -108,6 +105,12 @@ async function loadGame() {
     }
 
     buildKeyboard();
+
+    if (gameState.isUnlimited) {
+        gameState.targetWord = allAnswers[Math.floor(Math.random() * allAnswers.length)];
+    } else {
+        gameState.targetWord = await getDailyWord();
+    }
 
     if (!gameState.isUnlimited) {
         const saved = localStorage.getItem("dailydle-wordle-state");
@@ -169,7 +172,7 @@ function buildKeyboard() {
 }
 
 function handleInput(key) {
-    if (gameState.isAnimating) return;
+    if (gameState.isAnimating || !gameState.targetWord) return;
     if (gameState.isGameOver) {
         if (gameState.isUnlimited && key === "enter") {
             loadGame();
