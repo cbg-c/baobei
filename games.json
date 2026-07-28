@@ -9,6 +9,6 @@
     "id": "connections",
     "name": "Connections",
     "description": "Create four groups of four!",
-    "path": "about:blank"
+    "path": "games/connections/index.html"
   }
 ]
