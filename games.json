@@ -2,13 +2,13 @@
   {
     "id": "wordle",
     "name": "Wordle",
-    "description": "Guess the 5-letter word.",
+    "description": "6 changes to guess a 5-letter word.",
     "path": "games/wordle/index.html"
   },
   {
     "id": "connections",
     "name": "Connections",
-    "description": "(Coming Soon)",
+    "description": "Create four groups of four!",
     "path": "about:blank"
   }
 ]
