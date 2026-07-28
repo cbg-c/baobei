@@ -4,20 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dailydle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <aside class="sidebar">
-        <h1>Games</h1>
-        <nav id="menu-container">
-            <!-- Buttons injected by hub.js -->
-        </nav>
-    </aside>
-    
-    <main class="game-container">
-        <iframe id="game-frame" src="" title="Game Window"></iframe>
-    </main>
-
+    <div class="main-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Games</h1>
+                <p class="subtitle">Curated Puzzles</p>
+            </div>
+            <nav id="menu-container">
+            </nav>
+            <div class="sidebar-footer">
+                <small>© cbg-c/baobei</small>
+            </div>
+        </aside>
+        
+        <main class="content-area">
+            <header class="game-header">
+                <div class="game-meta">
+                    <span id="active-game-icon">🧩</span>
+                    <h2 id="active-game-name">Select a Game</h2>
+                </div>
+            </header>
+            <div class="game-view-container">
+                <iframe id="game-frame" src="" title="Game Window"></iframe>
+            </div>
+        </main>
+    </div>
     <script src="hub.js"></script>
 </body>
 </html>
