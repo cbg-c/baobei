@@ -2,7 +2,7 @@
   {
     "id": "wordle",
     "name": "Wordle",
-    "description": "6 changes to guess a 5-letter word.",
+    "description": "Get 6 chances to guess a 5-letter word.",
     "path": "games/wordle/index.html"
   },
   {
@@ -10,5 +10,11 @@
     "name": "Connections",
     "description": "Create four groups of four!",
     "path": "games/connections/index.html"
+  },
+  {
+    "id": "flagle",
+    "name": "Flagle",
+    "description": "Guess the country by its flag.",
+    "path": "games/flagle/index.html"
   }
 ]
