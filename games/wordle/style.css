@@ -41,6 +41,22 @@ body {
     height: 50px;
     border-bottom: 1px solid var(--border-inactive);
     flex-shrink: 0;
+    position: relative;
+}
+#home-btn {
+    position: absolute;
+    left: 15px;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+#home-btn:hover {
+    opacity: 1;
 }
 .toggle-container {
     display: flex;
