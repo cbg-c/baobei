@@ -38,6 +38,12 @@ async function init() {
     }
     buildKeyboard();
     document.addEventListener("keydown", handlePhysicalKey);
+    
+    window.addEventListener("message", (e) => {
+        if (e.data && e.data.type === "forward-keydown") {
+            handleInput(e.data.key.toLowerCase());
+        }
+    });
 }
 
 function buildKeyboard() {
