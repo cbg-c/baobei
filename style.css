@@ -1,16 +1,10 @@
 :root {
-    /* Color Palette */
-    --bg-main: #121212;         /* Deep background */
-    --bg-sidebar: #1a1a1a;      /* Lighter sidebar */
-    --bg-element: #242424;      /* Game view border/container */
-    --text-primary: #e0e0e0;     /* Soft white */
-    --text-secondary: #9e9e9e;   /* Gray text */
-    --accent-primary: #4fc3f7;   /* Cyber Cyan */
-    --accent-glow: rgba(79, 195, 247, 0.2);
-    
-    /* Typography & Spacing */
+    --bg-main: #121212;
+    --bg-card: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --accent-color: #538d4e;
     --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
-    --border-radius: 10px;
 }
 
 * {
@@ -21,135 +15,70 @@
 }
 
 body {
-    height: 100vh;
     background-color: var(--bg-main);
     color: var(--text-primary);
-    overflow: hidden;
-}
-
-.main-layout {
-    display: flex;
-    height: 100%;
-}
-
-/* --- Sidebar --- */
-.sidebar {
-    width: 280px;
-    background-color: var(--bg-sidebar);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #333;
-    z-index: 10;
+    align-items: center;
 }
 
-.sidebar-header {
-    padding: 30px 20px 20px;
-}
-
-.sidebar-header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-.subtitle {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
-
-#menu-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 0 15px;
-    gap: 8px;
-}
-
-.game-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    padding: 15px;
-    border-radius: var(--border-radius);
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.game-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
-}
-
-/* Active State: Glow and cyan border */
-.game-btn.active {
-    background: rgba(79, 195, 247, 0.1);
-    color: white;
-    border-left: 3px solid var(--accent-primary);
-    box-shadow: 0 0 15px var(--accent-glow);
-}
-
-.game-btn strong {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.game-btn small {
-    font-size: 0.8rem;
-    color: inherit;
-    opacity: 0.8;
-}
-
-.sidebar-footer {
-    padding: 15px;
+.hub-header {
     text-align: center;
-    border-top: 1px solid #333;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
+    padding: 60px 20px 40px;
+    width: 100%;
+    border-bottom: 1px solid #333;
+    background-color: #161616;
 }
 
-/* --- Content Area --- */
-.content-area {
-    flex: 1;
+.hub-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.hub-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 40px 24px;
+}
+
+.game-tile {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    padding: 30px 24px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #333;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
-}
-
-.game-header {
-    padding: 20px 30px;
-    border-bottom: 1px solid #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--bg-main);
-}
-
-.game-meta {
-    display: flex;
-    align-items: center;
     gap: 12px;
 }
 
-#active-game-name {
-    font-size: 1.3rem;
+.game-tile:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.game-tile h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
-.game-view-container {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-}
-
-#game-frame {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background-color: transparent; /* Allows game mode to show */
-    border-radius: var(--border-radius);
-    /* Subtle border around the iframe to make it pop */
-    outline: 2px solid var(--bg-element); 
+.game-tile p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
 }
