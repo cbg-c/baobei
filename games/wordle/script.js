@@ -47,10 +47,7 @@ function switchMode(unlimited) {
 }
 
 function getDailyWord() {
-    const epochMs = new Date("2021-06-19T00:00:00").valueOf();
-    const now = Date.now();
-    const msInDay = 86400000;
-    const index = Math.floor((now - epochMs) / msInDay);
+    const index = Math.floor(Date.now() / 86400000);
     return allAnswers[index % allAnswers.length];
 }
 
