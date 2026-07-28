@@ -27,4 +27,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             btn.click();
         }
     });
+
+    gameFrame.addEventListener("load", () => {
+        gameFrame.focus();
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (document.activeElement !== gameFrame) {
+            gameFrame.contentWindow.postMessage({ type: "forward-keydown", key: e.key }, "*");
+        }
+    });
+
+    document.addEventListener("click", () => {
+        gameFrame.focus();
+    });
 });
