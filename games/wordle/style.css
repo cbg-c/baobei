@@ -33,12 +33,44 @@ body {
     height: 100%;
     position: relative;
 }
+#game-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    border-bottom: 1px solid var(--border-inactive);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.toggle-container {
+    display: flex;
+    background-color: var(--border-inactive);
+    border-radius: 4px;
+    padding: 2px;
+}
+.mode-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+.mode-btn.active {
+    background-color: var(--bg-main);
+}
 #board-container {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 50px;
+    padding-top: 70px;
     width: 100%;
 }
 #board {
@@ -132,7 +164,7 @@ body {
 .key.absent { background-color: var(--key-bg-wrong); }
 #message-container {
     position: absolute;
-    top: 10%;
+    top: 60px;
     left: 50%;
     transform: translate(-50%, 0);
     z-index: 100;
