@@ -37,18 +37,26 @@ async function init() {
         }
     });
 
-    await loadGame();
+    loadGame();
 }
 
-async function switchMode(unlimited) {
+function switchMode(unlimited) {
     if (gameState.isUnlimited === unlimited) return;
     document.getElementById("mode-daily").className = unlimited ? "mode-btn" : "mode-btn active";
     document.getElementById("mode-unlimited").className = unlimited ? "mode-btn active" : "mode-btn";
     gameState.isUnlimited = unlimited;
-    await loadGame();
+    loadGame();
 }
 
-async function getDailyWord() {
+function getLocalDailyWord() {
+    const now = new Date();
+    const start = new Date(2021, 5, 19, 0, 0, 0, 0);
+    const diff = now.setHours(0, 0, 0, 0) - start.getTime();
+    const index = Math.floor(diff / 86400000);
+    return allAnswers[index % allAnswers.length];
+}
+
+async function fetchNytDailyWord() {
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -77,14 +85,10 @@ async function getDailyWord() {
             }
         } catch (e) {}
     }
-    
-    const start = new Date(2021, 5, 19, 0, 0, 0, 0);
-    const diff = now.setHours(0, 0, 0, 0) - start.getTime();
-    const index = Math.floor(diff / 86400000);
-    return allAnswers[index % allAnswers.length];
+    return null;
 }
 
-async function loadGame() {
+function loadGame() {
     document.getElementById("message").className = "";
     const boardEl = document.getElementById("board");
     boardEl.innerHTML = "";
@@ -97,7 +101,6 @@ async function loadGame() {
     gameState.isAnimating = false;
     gameState.board = [];
     gameState.keyStates = {};
-    gameState.targetWord = "";
 
     for (let r = 0; r < MAX_GUESSES; r++) {
         const row = document.createElement("div");
@@ -119,19 +122,28 @@ async function loadGame() {
     if (gameState.isUnlimited) {
         gameState.targetWord = allAnswers[Math.floor(Math.random() * allAnswers.length)];
     } else {
-        gameState.targetWord = await getDailyWord();
-    }
-
-    if (!gameState.isUnlimited) {
+        gameState.targetWord = getLocalDailyWord();
+        
         const saved = localStorage.getItem("dailydle-wordle-state");
         if (saved) {
             const parsed = JSON.parse(saved);
             if (parsed.targetWord === gameState.targetWord) {
                 restoreState(parsed);
-            } else {
-                localStorage.removeItem("dailydle-wordle-state");
             }
         }
+
+        fetchNytDailyWord().then(nytWord => {
+            if (nytWord && nytWord !== gameState.targetWord && gameState.currentRow === 0) {
+                gameState.targetWord = nytWord;
+                const savedNyt = localStorage.getItem("dailydle-wordle-state");
+                if (savedNyt) {
+                    const parsedNyt = JSON.parse(savedNyt);
+                    if (parsedNyt.targetWord === gameState.targetWord) {
+                        loadGame();
+                    }
+                }
+            }
+        });
     }
 }
 
