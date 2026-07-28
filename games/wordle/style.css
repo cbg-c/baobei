@@ -30,8 +30,7 @@ body {
     align-items: center;
     max-width: 500px;
     width: 100%;
-    height: 100%;
-    position: relative;
+    height: 100vh;
 }
 #game-header {
     width: 100%;
@@ -40,9 +39,7 @@ body {
     align-items: center;
     height: 50px;
     border-bottom: 1px solid var(--border-inactive);
-    position: absolute;
-    top: 0;
-    left: 0;
+    flex-shrink: 0;
 }
 .toggle-container {
     display: flex;
@@ -65,13 +62,16 @@ body {
 .mode-btn.active {
     background-color: var(--bg-main);
 }
-#board-container {
+#play-area {
     flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
-    padding-top: 70px;
+    align-items: center;
     width: 100%;
+}
+#board-container {
+    margin-bottom: 40px;
 }
 #board {
     display: grid;
@@ -115,9 +115,8 @@ body {
     color: var(--color-filled);
 }
 #keyboard-container {
-    height: 200px;
     width: 100%;
-    padding: 0 8px 30px;
+    padding: 0 8px;
     box-sizing: border-box;
 }
 #keyboard {
@@ -164,7 +163,7 @@ body {
 .key.absent { background-color: var(--key-bg-wrong); }
 #message-container {
     position: absolute;
-    top: 60px;
+    top: 70px;
     left: 50%;
     transform: translate(-50%, 0);
     z-index: 100;
