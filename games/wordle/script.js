@@ -37,26 +37,42 @@ async function init() {
         }
     });
 
-    loadGame();
+    await loadGame();
 }
 
-function switchMode(unlimited) {
+async function switchMode(unlimited) {
     if (gameState.isUnlimited === unlimited) return;
     document.getElementById("mode-daily").className = unlimited ? "mode-btn" : "mode-btn active";
     document.getElementById("mode-unlimited").className = unlimited ? "mode-btn active" : "mode-btn";
     gameState.isUnlimited = unlimited;
-    loadGame();
+    await loadGame();
 }
 
-function getDailyWord() {
+async function getDailyWord() {
     const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const dateString = `${yyyy}-${mm}-${dd}`;
+    const url = `https://www.nytimes.com/svc/wordle/v2/${dateString}.json`;
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    
+    try {
+        const response = await fetch(proxyUrl);
+        if (response.ok) {
+            const data = await response.json();
+            return data.solution;
+        }
+    } catch (e) {
+    }
+    
     const start = new Date(2021, 5, 19, 0, 0, 0, 0);
     const diff = now.setHours(0, 0, 0, 0) - start.getTime();
     const index = Math.floor(diff / 86400000);
     return allAnswers[index % allAnswers.length];
 }
 
-function loadGame() {
+async function loadGame() {
     document.getElementById("message").className = "";
     const boardEl = document.getElementById("board");
     boardEl.innerHTML = "";
@@ -73,7 +89,7 @@ function loadGame() {
     if (gameState.isUnlimited) {
         gameState.targetWord = allAnswers[Math.floor(Math.random() * allAnswers.length)];
     } else {
-        gameState.targetWord = getDailyWord();
+        gameState.targetWord = await getDailyWord();
     }
 
     for (let r = 0; r < MAX_GUESSES; r++) {
