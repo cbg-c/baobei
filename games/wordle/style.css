@@ -1,31 +1,58 @@
+:root {
+    /* NYT Official Wordle Colors */
+    --color-correct: #6aaa64;    /* Green */
+    --color-present: #c9b458;    /* Yellow */
+    --color-absent: #787c7e;     /* Gray */
+    --border-default: #d3d6da;   /* Light Gray */
+    --border-active: #878a8c;    /* Dark Gray */
+    --text-filled: #000000;      /* Default Text */
+    --text-white: #ffffff;
+    
+    /* Animation Timing */
+    --animation-speed-fast: 250ms;
+    --animation-speed-slow: 500ms;
+}
+
 body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-family: Arial, sans-serif;
+    font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif; /* Standard Wordle fonts */
     margin: 0;
-    padding: 20px;
-    background: #fff;
+    padding: 10px;
+    color: #000;
+    background-color: #fff; /* Games should default light unless they have their own dark mode */
 }
 
-.header {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #d3d6da;
-    padding-bottom: 10px;
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    max-width: 500px;
     width: 100%;
-    text-align: center;
-    max-width: 400px;
+}
+
+#message-container {
+    height: 35px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #message {
-    height: 24px;
+    padding: 10px 20px;
+    border-radius: 4px;
     font-weight: bold;
-    color: #e63946;
-    margin-bottom: 10px;
+    font-size: 0.9rem;
+    background-color: #000;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
+/* --- Game Board & Tiles --- */
 #board {
     display: grid;
     grid-template-rows: repeat(6, 1fr);
@@ -40,23 +67,132 @@ body {
 }
 
 .tile {
-    width: 60px;
-    height: 60px;
-    border: 2px solid #d3d6da;
+    width: 62px;
+    height: 62px;
+    border: 2px solid var(--border-default);
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 2rem;
-    font-weight: bold;
+    font-weight: 700;
     text-transform: uppercase;
+    user-select: none;
+    color: var(--text-filled);
 }
 
-.tile.filled { border-color: #878a8c; }
-.tile.correct { background-color: #6aaa64; color: white; border-color: #6aaa64; }
-.tile.present { background-color: #c9b458; color: white; border-color: #c9b458; }
-.tile.absent { background-color: #787c7e; color: white; border-color: #787c7e; }
-
-.instructions {
-    color: #787c7e;
-    font-size: 0.9rem;
+/* States */
+.tile[data-state='filled'] {
+    border-color: var(--border-active);
 }
+
+/* Color states apply when revealed after submission */
+.tile[data-state='correct'] {
+    background-color: var(--color-correct);
+    border-color: var(--color-correct);
+    color: var(--text-white);
+}
+
+.tile[data-state='present'] {
+    background-color: var(--color-present);
+    border-color: var(--color-present);
+    color: var(--text-white);
+}
+
+.tile[data-state='absent'] {
+    background-color: var(--color-absent);
+    border-color: var(--color-absent);
+    color: var(--text-white);
+}
+
+/* --- Animations --- */
+.tile.flip-in {
+    animation: flipIn var(--animation-speed-slow) ease-in;
+}
+
+.tile.bounce {
+    animation: bounce 600ms ease-in-out;
+}
+
+.row.shake {
+    animation: shake 500ms ease-in-out;
+}
+
+@keyframes flipIn {
+    0% { transform: rotateX(0); }
+    100% { transform: rotateX(-90deg); }
+}
+
+/* The actual NYT animation is staggered flip, then back-flip with new color */
+@keyframes flipReveal {
+    0% { transform: rotateX(-90deg); }
+    100% { transform: rotateX(0); }
+}
+
+@keyframes bounce {
+    0%, 20% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    50% { transform: translateY(5px); }
+    60% { transform: translateY(-10px); }
+    80% { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes shake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-4px); }
+    40%, 60% { transform: translateX(4px); }
+}
+
+/* --- Official Visual Keyboard --- */
+#keyboard {
+    margin: 0 8px;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.keyboard-row {
+    display: flex;
+    width: 100%;
+    margin: 0 auto 8px;
+    justify-content: center;
+}
+
+.key {
+    font-family: inherit;
+    font-weight: bold;
+    border: 0;
+    padding: 0;
+    margin: 0 3px;
+    height: 58px;
+    background-color: #d3d6da; /* Default Key Gray */
+    color: #000;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    transition: background-color 0.2s;
+}
+
+.key:hover { background-color: #c0c4c9; }
+
+.key[data-key='enter'], .key[data-key='backspace'] {
+    flex: 1.5;
+    font-size: 0.75rem;
+}
+
+/* Key States (Letters Left Tracked Here) */
+.key.correct { background-color: var(--color-correct); color: var(--text-white); }
+.key.correct:hover { background-color: #79c071; }
+
+.key.present { background-color: var(--color-present); color: var(--text-white); }
+.key.present:hover { background-color: #dfc869; }
+
+.key.absent { background-color: var(--color-absent); color: var(--text-white); }
+.key.absent:hover { background-color: #8f9396; }
