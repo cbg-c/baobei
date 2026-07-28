@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const menuContainer = document.getElementById("menu-container");
     const gameFrame = document.getElementById("game-frame");
+    const activeGameName = document.getElementById("active-game-name");
     let buttons = [];
 
-    // Fetch game list
     const response = await fetch("games.json");
     const games = await response.json();
 
@@ -13,10 +13,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.innerHTML = `<strong>${game.name}</strong><small>${game.description}</small>`;
         
         btn.addEventListener("click", () => {
-            // Update iframe
             gameFrame.src = game.path;
+            activeGameName.textContent = game.name;
             
-            // Manage active state styling
             buttons.forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
         });
@@ -24,7 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         menuContainer.appendChild(btn);
         buttons.push(btn);
 
-        // Auto-load the first game
         if (index === 0) {
             btn.click();
         }
