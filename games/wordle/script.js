@@ -181,9 +181,16 @@ function saveState() {
 
 function buildKeyboard() {
     const kbEl = document.getElementById("keyboard");
-    LAYOUT.forEach(row => {
+    LAYOUT.forEach((row, rowIndex) => {
         const rowEl = document.createElement("div");
         rowEl.className = "keyboard-row";
+        
+        if (rowIndex === 1) {
+            const spacer = document.createElement("div");
+            spacer.className = "spacer";
+            rowEl.appendChild(spacer);
+        }
+
         row.forEach(key => {
             const btn = document.createElement("button");
             btn.className = "key";
@@ -196,6 +203,13 @@ function buildKeyboard() {
             btn.addEventListener("click", () => handleInput(key));
             rowEl.appendChild(btn);
         });
+
+        if (rowIndex === 1) {
+            const spacer = document.createElement("div");
+            spacer.className = "spacer";
+            rowEl.appendChild(spacer);
+        }
+
         kbEl.appendChild(rowEl);
     });
 }
@@ -218,6 +232,7 @@ function handleInput(key) {
 }
 
 function handlePhysicalKey(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     handleInput(e.key.toLowerCase());
 }
 
