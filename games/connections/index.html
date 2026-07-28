@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connections</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <header id="game-header">
+            <a href="../../index.html" id="home-btn" title="Back to Dailydle">
+                <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 0 24 24" width="28" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+            </a>
+            <div class="toggle-container">
+                <button id="mode-daily" class="mode-btn active">Daily</button>
+                <button id="mode-unlimited" class="mode-btn">Unlimited</button>
+            </div>
+        </header>
+        <div id="play-area">
+            <div id="instructions">Create four groups of four!</div>
+            <div id="board-container">
+                <div id="solved-board"></div>
+                <div id="board"></div>
+            </div>
+            <div id="mistakes-container">
+                <span>Mistakes remaining:</span>
+                <div id="mistakes-bubbles">
+                    <span class="bubble"></span>
+                    <span class="bubble"></span>
+                    <span class="bubble"></span>
+                    <span class="bubble"></span>
+                </div>
+            </div>
+            <div id="controls-container">
+                <button id="btn-shuffle" class="control-btn">Shuffle</button>
+                <button id="btn-deselect" class="control-btn" disabled>Deselect All</button>
+                <button id="btn-submit" class="control-btn" disabled>Submit</button>
+            </div>
+        </div>
+        <div id="message-container">
+            <div id="message"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
