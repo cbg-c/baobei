@@ -55,18 +55,28 @@ async function getDailyWord() {
     const dd = String(now.getDate()).padStart(2, '0');
     const dateString = `${yyyy}-${mm}-${dd}`;
     const url = `https://www.nytimes.com/svc/wordle/v2/${dateString}.json`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
     
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500);
-        const response = await fetch(proxyUrl, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (response.ok) {
-            const data = await response.json();
-            return data.solution;
-        }
-    } catch (e) {}
+    const proxies = [
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?${encodeURIComponent(url)}`
+    ];
+
+    for (const proxy of proxies) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const response = await fetch(proxy, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.solution) {
+                    return data.solution;
+                }
+            }
+        } catch (e) {}
+    }
     
     const start = new Date(2021, 5, 19, 0, 0, 0, 0);
     const diff = now.setHours(0, 0, 0, 0) - start.getTime();
