@@ -151,7 +151,7 @@ body {
 }
 #keyboard-container {
     width: 100%;
-    padding: 0 4px;
+    padding: 0 8px;
     box-sizing: border-box;
     margin-bottom: 20px;
 }
@@ -166,21 +166,22 @@ body {
     width: 100%;
     margin: 0 auto 8px;
     touch-action: manipulation;
+    justify-content: center;
 }
 .key {
     font-family: inherit;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.25em;
     border: 0;
     padding: 0;
-    margin: 0 2px;
+    margin: 0 3px;
     height: 58px;
     background-color: var(--key-bg);
     color: var(--text-primary);
     border-radius: 4px;
     cursor: pointer;
     user-select: none;
-    flex: 1;
+    flex: 1 1 0%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -191,8 +192,11 @@ body {
     filter: brightness(0.9);
 }
 .key[data-key='enter'], .key[data-key='backspace'] {
-    flex: 1.5;
-    font-size: 0.8rem;
+    flex: 1.5 1 0%;
+    font-size: 0.85em;
+}
+.spacer {
+    flex: 0.5 1 0%;
 }
 .key.correct { background-color: var(--key-bg-correct); }
 .key.present { background-color: var(--key-bg-present); }
