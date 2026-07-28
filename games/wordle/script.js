@@ -10,6 +10,7 @@ let gameState = {
     currentRow: 0,
     currentTile: 0,
     isGameOver: false,
+    isAnimating: false,
     board: [],
     targetWord: "",
     validWords: new Set(),
@@ -18,6 +19,7 @@ let gameState = {
 };
 
 let allAnswers = [];
+let messageTimeout;
 
 async function init() {
     const res = await fetch("words.json");
@@ -47,11 +49,15 @@ function switchMode(unlimited) {
 }
 
 function getDailyWord() {
-    const index = Math.floor(Date.now() / 86400000);
+    const now = new Date();
+    const start = new Date(2021, 5, 19, 0, 0, 0, 0);
+    const diff = now.setHours(0, 0, 0, 0) - start.getTime();
+    const index = Math.floor(diff / 86400000);
     return allAnswers[index % allAnswers.length];
 }
 
 function loadGame() {
+    document.getElementById("message").className = "";
     const boardEl = document.getElementById("board");
     boardEl.innerHTML = "";
     const kbEl = document.getElementById("keyboard");
@@ -60,6 +66,7 @@ function loadGame() {
     gameState.currentRow = 0;
     gameState.currentTile = 0;
     gameState.isGameOver = false;
+    gameState.isAnimating = false;
     gameState.board = [];
     gameState.keyStates = {};
 
@@ -146,6 +153,7 @@ function buildKeyboard() {
 }
 
 function handleInput(key) {
+    if (gameState.isAnimating) return;
     if (gameState.isGameOver) {
         if (gameState.isUnlimited && key === "enter") {
             loadGame();
@@ -185,7 +193,10 @@ function deleteLetter() {
 
 function submitGuess(isRestoring = false) {
     if (gameState.currentTile !== WORD_LENGTH) {
-        if (!isRestoring) showMessage("Not enough letters");
+        if (!isRestoring) {
+            showMessage("Not enough letters");
+            shakeRow();
+        }
         return;
     }
     let guess = "";
@@ -193,7 +204,10 @@ function submitGuess(isRestoring = false) {
         guess += gameState.board[gameState.currentRow][i].textContent.toLowerCase();
     }
     if (!gameState.validWords.has(guess)) {
-        if (!isRestoring) showMessage("Not in word list");
+        if (!isRestoring) {
+            showMessage("Not in word list");
+            shakeRow();
+        }
         return;
     }
     const tileRow = gameState.board[gameState.currentRow];
@@ -213,24 +227,63 @@ function submitGuess(isRestoring = false) {
             targetArr[index] = null;
         }
     }
-    for (let i = 0; i < WORD_LENGTH; i++) {
-        tileRow[i].setAttribute('data-state', results[i]);
-        updateKeyState(guess[i], results[i]);
+    
+    if (isRestoring) {
+        for (let i = 0; i < WORD_LENGTH; i++) {
+            tileRow[i].setAttribute('data-state', results[i]);
+            updateKeyState(guess[i], results[i]);
+        }
+        finalizeGuess(guess, isRestoring);
+    } else {
+        gameState.isAnimating = true;
+        for (let i = 0; i < WORD_LENGTH; i++) {
+            setTimeout(() => {
+                tileRow[i].classList.add("flip-in");
+                setTimeout(() => {
+                    tileRow[i].classList.remove("flip-in");
+                    tileRow[i].setAttribute('data-state', results[i]);
+                    tileRow[i].classList.add("flip-out");
+                    updateKeyState(guess[i], results[i]);
+                    setTimeout(() => {
+                        tileRow[i].classList.remove("flip-out");
+                    }, 250);
+                }, 250);
+            }, i * 300);
+        }
+        setTimeout(() => {
+            gameState.isAnimating = false;
+            finalizeGuess(guess, isRestoring);
+        }, (WORD_LENGTH * 300) + 250);
     }
-    
-    gameState.currentRow++;
-    
-    if (!isRestoring) saveState();
+}
 
+function finalizeGuess(guess, isRestoring) {
+    gameState.currentRow++;
+    if (!isRestoring) saveState();
+    
     if (guess === gameState.targetWord) {
-        if (!isRestoring) showMessage(gameState.isUnlimited ? "Splendid! Press Enter to play again." : "Splendid!");
+        if (!isRestoring) {
+            showMessage(gameState.isUnlimited ? "Splendid! Press Enter to play again." : "Splendid!", true);
+            const tileRow = gameState.board[gameState.currentRow - 1];
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                setTimeout(() => {
+                    tileRow[i].classList.add("bounce");
+                }, i * 100);
+            }
+        }
         gameState.isGameOver = true;
     } else if (gameState.currentRow === MAX_GUESSES) {
-        if (!isRestoring) showMessage(gameState.targetWord.toUpperCase() + (gameState.isUnlimited ? " - Press Enter to replay" : ""));
+        if (!isRestoring) showMessage(gameState.targetWord.toUpperCase() + (gameState.isUnlimited ? " - Press Enter to replay" : ""), true);
         gameState.isGameOver = true;
     } else {
         gameState.currentTile = 0;
     }
+}
+
+function shakeRow() {
+    const row = gameState.board[gameState.currentRow][0].parentNode;
+    row.classList.add("shake");
+    setTimeout(() => row.classList.remove("shake"), 600);
 }
 
 function updateKeyState(letter, state) {
@@ -245,11 +298,14 @@ function updateKeyState(letter, state) {
     }
 }
 
-function showMessage(msg) {
+function showMessage(msg, persistent = false) {
     const messageEl = document.getElementById("message");
     messageEl.textContent = msg;
     messageEl.className = "visible";
-    setTimeout(() => { messageEl.className = ""; }, 2500);
+    clearTimeout(messageTimeout);
+    if (!persistent) {
+        messageTimeout = setTimeout(() => { messageEl.className = ""; }, 2500);
+    }
 }
 
 init();
